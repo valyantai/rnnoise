@@ -5,18 +5,22 @@ pip install -r requirements.txt
 For utility to write pcm audio, see https://github.com/xiph/rnnoise/issues/8 (https://github.com/smallmuou/wavutils)
 Source of rnn_data.py and rnn_train_finetune.py here: https://github.com/xiph/rnnoise/issues/79
 
-(0) wavutils/bin/wav2pcm wavs/talking.wav raw/talking.pcm; wavutils/bin/wav2pcm wavs/noise.wav raw/noise.pcm
+(0) source venv/bin/activate
+
+(0) mkdir raw/checkers_prod_2_23_21; wavutils/bin/wav2pcm wavs/checkers_prod_2_23_21/voice.wav raw/checkers_prod_2_23_21/voice.pcm; wavutils/bin/wav2pcm wavs/checkers_prod_2_23_21/noise.wav raw/checkers_prod_2_23_21/noise.pcm
 
 (1) cd src ; ./compile.sh
 
-(2) ./denoise_training talking.raw noise.raw 500000 > training.f32
+(2) ./denoise_training ../raw/checkers_prod_2_23_21/voice.pcm ../raw/checkers_prod_2_23_21/noise.pcm 500000 > training.f32
 
     (note the matrix size and replace 500000 87 below)
 
-(3) cd training ; ipython bin2hdf5.py ../src/training.f32 500000 87 training.h5
+(3) cd ../training ; ipython bin2hdf5.py ../src/training.f32 500000 87 training.h5
 
 (4) ipython rnn_train_finetune.py
 
 (5) ipython rnn_train.py
 
-(6) ipython dump_rnn.py weights.hdf5 ../src/rnn_data.c trained_model.txt orig
+(6) ipython dump_rnn.py weights.hdf5 ../models/rnn_data.c ../models/checkers_prod_2_23_21_model.txt orig
+
+(7) aws s3 cp ../models/checkers_prod_2_23_21_model.txt s3://valyant-vs2t-models/rnnoise/2021-02-23/checkers_prod_model.txt

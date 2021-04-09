@@ -1,0 +1,10 @@
+wavs/
+
+*.pb
+*.h5
+*model.*
+*.pyc
+*.pcm
+*.opus*
+*.wav*
+.env
