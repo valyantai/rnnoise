@@ -14,7 +14,7 @@ from keras.layers import Dense
 from keras.layers import GRU
 from keras.layers import Input
 from keras.models import Model
-from keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import load_model
 
 
