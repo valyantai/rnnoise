@@ -65,7 +65,7 @@ def parse_arguments():
     parser.add_argument("-t", "--training_data_path",
                         required=True, help="training data in h5 format to train on")
     parser.add_argument("-o", "--output_model_path",
-                        required=True, defalut="weights.hdf5", help="path to store the output trained mode in hdf5 format")
+                        required=True, default="weights.hdf5", help="path to store the output trained mode in hdf5 format")
 
     return parser.parse_args()
 
