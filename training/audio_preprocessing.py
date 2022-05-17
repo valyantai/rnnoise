@@ -33,6 +33,7 @@ def main():
         os.system(f'ffmpeg -i {base_path}/{file} -map_channel 0.0.0 {output_dir}/{file}.wav')
 
     noise = []
+    priority_noise = []
     voice = []
 
     if args.previous_wav_dir:
@@ -61,7 +62,10 @@ def main():
             start = row['start'] * 1000
             end = row['end'] * 1000
             noise.append(audio[end:])
-            voice.append(audio[start:end])
+            if row['label'] == 'noise':
+                priority_noise.append(audio[start:end])
+            else:
+                voice.append(audio[start:end])
             audio = audio[:start]
         noise.append(audio)
 
@@ -70,11 +74,19 @@ def main():
     for voice_segment in voice:
         voice_audio += voice_segment
 
-    random.shuffle(noise)
-    for noise_segment in noise:
+    for noise_segment in priority_noise:
         noise_audio += noise_segment
         if args.balance_dataset and noise_audio.duration_seconds > voice_audio.duration_seconds:
             break
+
+    # only add non-priority noise if we either don't care about balanced dataset
+    # or priority noise is not long enough yet
+    if not args.balance_dataset or noise_audio.duration_seconds < voice_audio.duration_seconds:
+        random.shuffle(noise)
+        for noise_segment in noise:
+            noise_audio += noise_segment
+            if args.balance_dataset and noise_audio.duration_seconds > voice_audio.duration_seconds:
+                break
 
     voice_audio = voice_audio.set_frame_rate(48000)
     noise_audio = noise_audio.set_frame_rate(48000)
