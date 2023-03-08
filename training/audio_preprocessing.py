@@ -11,6 +11,9 @@ def parse_arguments():
     parser.add_argument("-i", "--input_dir",
                                     required=True, help="Input directory")
 
+    parser.add_argument("-l", "--label_dir",
+                                    required=False, help="Label directory, set to input dir by default")
+
     parser.add_argument("-p", "--previous_wav_dir",
                                      required=False, help="Directory with previously preprocessed audio")
     parser.add_argument("-b", "--balance_dataset", type=bool, default=False, help="Should the algorithm remove random " \
@@ -22,6 +25,9 @@ def parse_arguments():
 def main():
     args = parse_arguments()
     base_path = args.input_dir
+    label_path = args.input_dir
+    if args.label_dir:
+        label_path=args.label_dir
     output_dir = os.path.join(base_path, 'session_wavs')
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -42,7 +48,7 @@ def main():
         voice_previous = AudioSegment.from_file(f"{args.previous_wav_dir}/voice.wav")
         voice.append(voice_previous)
 
-    for file in os.listdir(base_path):
+    for file in os.listdir(label_path):
         if not file.endswith('.voice_label'):
             continue
         print(file)
@@ -50,9 +56,9 @@ def main():
         ext = file_split.pop(-1)
         file_start = '.'.join(file_split)
         try:
-            df = pd.read_csv(f"{base_path}/{file}", sep='\t', header=None)
+            df = pd.read_csv(f"{label_path}/{file}", sep='\t', header=None)
         except:
-            print(f"could not read {base_path}/{file}")
+            print(f"could not read {label_path}/{file}")
             continue
         df.columns = ['start', 'end', 'label']
         audio = AudioSegment.from_file(f"{output_dir}/{file_start}.wav")
@@ -64,7 +70,7 @@ def main():
             noise.append(audio[end:])
             if row['label'] == 'noise':
                 priority_noise.append(audio[start:end])
-            else:
+            elif row['label'] != 'emp':
                 voice.append(audio[start:end])
             audio = audio[:start]
         noise.append(audio)
