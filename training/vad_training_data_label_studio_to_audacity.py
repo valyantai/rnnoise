@@ -55,7 +55,7 @@ def transform_json_to_csv_utterances(json_data, output_dir):
                     label = labels[0]
                     if label!='utterance':
                         continue
-                    utterances.append((start,end,label))
+                    utterances.append((start,end,'voice'))
 
                     speech_utterances = []
                     for result in annotation.get('result', []):
@@ -79,7 +79,7 @@ def transform_json_to_csv_utterances(json_data, output_dir):
                                 print(f"skipping speech segment {start}-{end} due to overlap with utterance {utterance} in {audio_file} id={id}")
                                 break
                         if not utterance_overlap:
-                            speech_utterances.append((start, end, label))
+                            speech_utterances.append((start, end, 'voice'))
 
                 utterances = utterances + speech_utterances
                 for utterance in utterances:
@@ -97,5 +97,8 @@ with open(label_studio_json_export) as f:
 
 transform_json_to_csv(json_data,output_dir, ['noise','speech'])
 output_dir = os.path.join(os.path.dirname(label_studio_json_export),'voice_label_utterances')
-transform_json_to_csv_utterances(json_data,output_dir)
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+transform_json_to_csv_utterances(json_data, output_dir)
 
